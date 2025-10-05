@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Discord Intents Calculator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: linear-gradient(
+          135deg,
+          #1a1a2e 0%,
+          #16213e 50%,
+          #0f3460 100%
+        );
+        color: #e0e0e0;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-top: 20px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: #9ca3af;
+        margin-bottom: 10px;
+      }
+
+      .docs-link {
+        color: #a855f7;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .docs-link:hover {
+        color: #c084fc;
+      }
+
+      .warning-box {
+        background: rgba(202, 138, 4, 0.1);
+        border: 1px solid rgba(202, 138, 4, 0.3);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+
+      .warning-box h3 {
+        color: #fbbf24;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+      }
+
+      .warning-text {
+        color: #d1d5db;
+        margin-bottom: 15px;
+        font-size: 0.95rem;
+      }
+
+      .privileged-switches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .switch-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+
+      .switch-label input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+
+      .missing-warning {
+        margin-top: 15px;
+        color: #fca5a5;
+        font-size: 0.9rem;
+      }
+
+      .card {
+        background: rgba(55, 65, 81, 0.5);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(75, 85, 99, 0.5);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+      }
+
+      .card h2 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .templates-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+      }
+
+      .template-btn {
+        background: rgba(55, 65, 81, 0.5);
+        border: 1px solid #4b5563;
+        border-radius: 8px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+      }
+
+      .template-btn:hover {
+        background: rgba(139, 92, 246, 0.2);
+        border-color: #a855f7;
+      }
+
+      .template-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+        font-size: 0.95rem;
+      }
+
+      .template-desc {
+        font-size: 0.8rem;
+        color: #9ca3af;
+      }
+
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+
+      .tool-input {
+        background: #374151;
+        border: 1px solid #4b5563;
+        border-radius: 6px;
+        padding: 10px 15px;
+        color: #e0e0e0;
+        font-size: 0.9rem;
+        flex: 1;
+      }
+
+      .tool-input:focus {
+        outline: none;
+        border-color: #a855f7;
+      }
+
+      .btn {
+        background: #8b5cf6;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 20px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+      }
+
+      .btn:hover {
+        background: #7c3aed;
+      }
+
+      .btn-secondary {
+        background: #4b5563;
+      }
+
+      .btn-secondary:hover {
+        background: #374151;
+      }
+
+      .btn-danger {
+        background: rgba(220, 38, 38, 0.2);
+        border: 1px solid rgba(220, 38, 38, 0.5);
+      }
+
+      .btn-danger:hover {
+        background: rgba(220, 38, 38, 0.3);
+      }
+
+      .flex {
+        display: flex;
+        gap: 10px;
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 25px;
+      }
+
+      @media (max-width: 1024px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .intents-list {
+        position: sticky;
+        top: 20px;
+        max-height: 700px;
+        overflow-y: auto;
+      }
+
+      .intent-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        margin-bottom: 8px;
+      }
+
+      .intent-item:hover:not(.disabled) {
+        background: rgba(55, 65, 81, 0.5);
+      }
+
+      .intent-item.selected {
+        background: rgba(139, 92, 246, 0.2);
+        border: 1px solid rgba(168, 85, 247, 0.5);
+      }
+
+      .intent-item.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .intent-checkbox {
+        margin-top: 3px;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+      }
+
+      .intent-info {
+        flex: 1;
+      }
+
+      .intent-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+      }
+
+      .intent-details {
+        font-size: 0.75rem;
+        color: #9ca3af;
+      }
+
+      .shield-icon {
+        color: #fbbf24;
+        font-size: 0.8rem;
+      }
+
+      .value-display {
+        background: rgba(17, 24, 39, 0.5);
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .value-number {
+        font-size: 3rem;
+        font-family: "Courier New", monospace;
+        font-weight: bold;
+        color: #a855f7;
+        margin-bottom: 10px;
+      }
+
+      .binary-view {
+        font-size: 0.75rem;
+        font-family: "Courier New", monospace;
+        color: #9ca3af;
+        word-break: break-all;
+      }
+
+      .actions-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+      }
+
+      .usage-hint {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        text-align: center;
+      }
+
+      .usage-hint code {
+        background: rgba(17, 24, 39, 0.5);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+      }
+
+      .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 8px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .event-item {
+        background: rgba(55, 65, 81, 0.3);
+        border: 1px solid #4b5563;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        text-decoration: none;
+        color: #e0e0e0;
+        display: block;
+      }
+
+      .event-item:hover {
+        background: rgba(139, 92, 246, 0.2);
+        border-color: #a855f7;
+      }
+
+      .code-example {
+        background: rgba(17, 24, 39, 0.5);
+        border-radius: 8px;
+        padding: 20px;
+        overflow-x: auto;
+      }
+
+      .code-example pre {
+        font-family: "Courier New", monospace;
+        font-size: 0.85rem;
+        color: #c084fc;
+        line-height: 1.6;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 50px;
+        padding: 20px;
+        color: #6b7280;
+        font-size: 0.9rem;
+      }
+
+      footer a {
+        color: #a855f7;
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        color: #c084fc;
+      }
+
+      .comparison-box {
+        background: rgba(37, 99, 235, 0.1);
+        border: 1px solid rgba(37, 99, 235, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 25px;
+      }
+
+      .comparison-box h3 {
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+      }
+
+      .comp-added {
+        color: #86efac;
+        margin-bottom: 8px;
+      }
+
+      .comp-removed {
+        color: #fca5a5;
+      }
+
+      .toggle-btn {
+        background: none;
+        border: none;
+        color: #a855f7;
+        cursor: pointer;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .toggle-btn:hover {
+        color: #c084fc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>⚡ Discord Intents Calculator</h1>
+        <p class="subtitle">Calcule, compare e gerencie suas Gateway Intents</p>
+        <a
+          href="https://discord.com/developers/docs/topics/gateway#gateway-intents"
+          target="_blank"
+          class="docs-link"
+        >
+          📚 Documentação Oficial
+        </a>
+      </header>
+
+      <div class="warning-box">
+        <h3>🛡️ Intents Privilegiadas</h3>
+        <p class="warning-text">
+          Habilite apenas se você ativou no Developer Portal. Bots verificados
+          precisam de aprovação.
+        </p>
+        <div class="privileged-switches">
+          <label class="switch-label">
+            <input type="checkbox" id="privileged-members" />
+            <span>Server Members Intent</span>
+          </label>
+          <label class="switch-label">
+            <input type="checkbox" id="privileged-presences" />
+            <span>Presence Intent</span>
+          </label>
+          <label class="switch-label">
+            <input type="checkbox" id="privileged-content" />
+            <span>Message Content Intent</span>
+          </label>
+        </div>
+        <div
+          id="missing-warning"
+          class="missing-warning"
+          style="display: none"
+        ></div>
+      </div>
+
+      <div class="card">
+        <h2>⚡ Templates Rápidos</h2>
+        <div class="templates-grid" id="templates"></div>
+      </div>
+
+      <div class="tools-grid">
+        <div class="card">
+          <h2>🔍 Decodificar Intent</h2>
+          <div class="flex">
+            <input
+              type="text"
+              id="decode-input"
+              class="tool-input"
+              placeholder="Cole um número de intent..."
+            />
+            <button class="btn" id="decode-btn">Decode</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🔄 Comparar</h2>
+          <div class="flex">
+            <input
+              type="text"
+              id="compare-input"
+              class="tool-input"
+              placeholder="Valor para comparar..."
+            />
+            <button class="btn btn-secondary" id="compare-btn">Ativar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="comparison-result"></div>
+
+      <div class="main-grid">
+        <div>
+          <div class="card intents-list">
+            <h2>📋 Intents Disponíveis</h2>
+            <div id="intents-list"></div>
+            <button
+              class="btn btn-danger"
+              style="width: 100%; margin-top: 15px"
+              id="clear-all-btn"
+            >
+              Limpar Tudo
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+              "
+            >
+              <h2 style="margin: 0">💎 Valor da Intent</h2>
+              <button class="toggle-btn" id="binary-toggle-btn">
+                <span id="binary-toggle-text">👁️ Ver Binário</span>
+              </button>
+            </div>
+
+            <div class="value-display">
+              <div class="value-number" id="intent-value">0</div>
+              <div
+                class="binary-view"
+                id="binary-value"
+                style="display: none"
+              ></div>
+            </div>
+
+            <div class="actions-bar">
+              <button class="btn" id="copy-btn" style="flex: 1">
+                📋 Copiar Valor
+              </button>
+              <button class="btn btn-secondary" id="export-btn">
+                💾 Exportar
+              </button>
+              <button class="btn btn-secondary" id="import-btn">
+                📂 Importar
+              </button>
+              <input
+                type="file"
+                id="import-file"
+                style="display: none"
+                accept=".json"
+              />
+            </div>
+
+            <div class="usage-hint">
+              Use no discord.js:
+              <code
+                >new Client({ intents: <span id="hint-value">0</span> })</code
+              >
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>🎯 Eventos Disponíveis (<span id="events-count">5</span>)</h2>
+            <div class="events-grid" id="events-list"></div>
+          </div>
+
+          <div class="card">
+            <h2>💻 Exemplo de Código</h2>
+            <div class="code-example">
+              <pre id="code-example"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>Última atualização dos intents: Outubro 2024 • Bits 0-25</p>
+        <p style="margin-top: 10px">
+          Feito com 💜 • Sempre verifique a
+          <a href="https://discord.com/developers/docs" target="_blank"
+            >documentação oficial</a
+          >
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      const INTENTS = {
+        GUILDS: {
+          bit: 0,
+          events: [
+            "GUILD_CREATE",
+            "GUILD_UPDATE",
+            "GUILD_DELETE",
+            "GUILD_ROLE_CREATE",
+            "GUILD_ROLE_UPDATE",
+            "GUILD_ROLE_DELETE",
+            "CHANNEL_CREATE",
+            "CHANNEL_UPDATE",
+            "CHANNEL_DELETE",
+            "CHANNEL_PINS_UPDATE",
+            "THREAD_CREATE",
+            "THREAD_UPDATE",
+            "THREAD_DELETE",
+            "THREAD_LIST_SYNC",
+            "THREAD_MEMBER_UPDATE",
+            "THREAD_MEMBERS_UPDATE",
+            "STAGE_INSTANCE_CREATE",
+            "STAGE_INSTANCE_UPDATE",
+            "STAGE_INSTANCE_DELETE",
+          ],
+          privileged: false,
+        },
+        GUILD_MEMBERS: {
+          bit: 1,
+          events: [
+            "GUILD_MEMBER_ADD",
+            "GUILD_MEMBER_UPDATE",
+            "GUILD_MEMBER_REMOVE",
+            "THREAD_MEMBERS_UPDATE",
+          ],
+          privileged: true,
+        },
+        GUILD_MODERATION: {
+          bit: 2,
+          events: [
+            "GUILD_AUDIT_LOG_ENTRY_CREATE",
+            "GUILD_BAN_ADD",
+            "GUILD_BAN_REMOVE",
+          ],
+          privileged: false,
+        },
+        GUILD_EXPRESSIONS: {
+          bit: 3,
+          events: [
+            "GUILD_EMOJIS_UPDATE",
+            "GUILD_STICKERS_UPDATE",
+            "GUILD_SOUNDBOARD_SOUND_CREATE",
+            "GUILD_SOUNDBOARD_SOUND_UPDATE",
+            "GUILD_SOUNDBOARD_SOUND_DELETE",
+            "GUILD_SOUNDBOARD_SOUNDS_UPDATE",
+          ],
+          privileged: false,
+        },
+        GUILD_INTEGRATIONS: {
+          bit: 4,
+          events: [
+            "GUILD_INTEGRATIONS_UPDATE",
+            "INTEGRATION_CREATE",
+            "INTEGRATION_UPDATE",
+            "INTEGRATION_DELETE",
+          ],
+          privileged: false,
+        },
+        GUILD_WEBHOOKS: {
+          bit: 5,
+          events: ["WEBHOOKS_UPDATE"],
+          privileged: false,
+        },
+        GUILD_INVITES: {
+          bit: 6,
+          events: ["INVITE_CREATE", "INVITE_DELETE"],
+          privileged: false,
+        },
+        GUILD_VOICE_STATES: {
+          bit: 7,
+          events: ["VOICE_CHANNEL_EFFECT_SEND", "VOICE_STATE_UPDATE"],
+          privileged: false,
+        },
+        GUILD_PRESENCES: {
+          bit: 8,
+          events: ["PRESENCE_UPDATE"],
+          privileged: true,
+        },
+        GUILD_MESSAGES: {
+          bit: 9,
+          events: [
+            "MESSAGE_CREATE",
+            "MESSAGE_UPDATE",
+            "MESSAGE_DELETE",
+            "MESSAGE_DELETE_BULK",
+          ],
+          privileged: false,
+        },
+        GUILD_MESSAGE_REACTIONS: {
+          bit: 10,
+          events: [
+            "MESSAGE_REACTION_ADD",
+            "MESSAGE_REACTION_REMOVE",
+            "MESSAGE_REACTION_REMOVE_ALL",
+            "MESSAGE_REACTION_REMOVE_EMOJI",
+          ],
+          privileged: false,
+        },
+        GUILD_MESSAGE_TYPING: {
+          bit: 11,
+          events: ["TYPING_START"],
+          privileged: false,
+        },
+        DIRECT_MESSAGES: {
+          bit: 12,
+          events: [
+            "MESSAGE_CREATE",
+            "MESSAGE_UPDATE",
+            "MESSAGE_DELETE",
+            "CHANNEL_PINS_UPDATE",
+          ],
+          privileged: false,
+        },
+        DIRECT_MESSAGE_REACTIONS: {
+          bit: 13,
+          events: [
+            "MESSAGE_REACTION_ADD",
+            "MESSAGE_REACTION_REMOVE",
+            "MESSAGE_REACTION_REMOVE_ALL",
+            "MESSAGE_REACTION_REMOVE_EMOJI",
+          ],
+          privileged: false,
+        },
+        DIRECT_MESSAGE_TYPING: {
+          bit: 14,
+          events: ["TYPING_START"],
+          privileged: false,
+        },
+        MESSAGE_CONTENT: { bit: 15, events: [], privileged: true },
+        GUILD_SCHEDULED_EVENTS: {
+          bit: 16,
+          events: [
+            "GUILD_SCHEDULED_EVENT_CREATE",
+            "GUILD_SCHEDULED_EVENT_UPDATE",
+            "GUILD_SCHEDULED_EVENT_DELETE",
+            "GUILD_SCHEDULED_EVENT_USER_ADD",
+            "GUILD_SCHEDULED_EVENT_USER_REMOVE",
+          ],
+          privileged: false,
+        },
+        AUTO_MODERATION_CONFIGURATION: {
+          bit: 20,
+          events: [
+            "AUTO_MODERATION_RULE_CREATE",
+            "AUTO_MODERATION_RULE_UPDATE",
+            "AUTO_MODERATION_RULE_DELETE",
+          ],
+          privileged: false,
+        },
+        AUTO_MODERATION_EXECUTION: {
+          bit: 21,
+          events: ["AUTO_MODERATION_ACTION_EXECUTION"],
+          privileged: false,
+        },
+        GUILD_MESSAGE_POLLS: {
+          bit: 24,
+          events: ["MESSAGE_POLL_VOTE_ADD", "MESSAGE_POLL_VOTE_REMOVE"],
+          privileged: false,
+        },
+        DIRECT_MESSAGE_POLLS: {
+          bit: 25,
+          events: ["MESSAGE_POLL_VOTE_ADD", "MESSAGE_POLL_VOTE_REMOVE"],
+          privileged: false,
+        },
+      };
+
+      const TEMPLATES = {
+        basic: {
+          name: "🤖 Bot Básico",
+          intents: ["GUILDS", "GUILD_MESSAGES"],
+          description: "Comandos básicos sem ler conteúdo",
+        },
+        moderation: {
+          name: "🛡️ Moderação",
+          intents: [
+            "GUILDS",
+            "GUILD_MEMBERS",
+            "GUILD_MODERATION",
+            "GUILD_MESSAGES",
+            "MESSAGE_CONTENT",
+            "AUTO_MODERATION_CONFIGURATION",
+            "AUTO_MODERATION_EXECUTION",
+          ],
+          description: "Moderação completa + automod",
+        },
+        music: {
+          name: "🎵 Bot de Música",
+          intents: [
+            "GUILDS",
+            "GUILD_VOICE_STATES",
+            "GUILD_MESSAGES",
+            "MESSAGE_CONTENT",
+          ],
+          description: "Player de música básico",
+        },
+        logging: {
+          name: "📝 Logs Completos",
+          intents: [
+            "GUILDS",
+            "GUILD_MEMBERS",
+            "GUILD_MODERATION",
+            "GUILD_MESSAGES",
+            "GUILD_MESSAGE_REACTIONS",
+            "GUILD_VOICE_STATES",
+            "GUILD_INVITES",
+            "GUILD_WEBHOOKS",
+          ],
+          description: "Auditoria e logs de servidor",
+        },
+        community: {
+          name: "👥 Bot Social",
+          intents: [
+            "GUILDS",
+            "GUILD_MEMBERS",
+            "GUILD_PRESENCES",
+            "GUILD_MESSAGES",
+            "MESSAGE_CONTENT",
+            "GUILD_MESSAGE_REACTIONS",
+            "GUILD_SCHEDULED_EVENTS",
+          ],
+          description: "Interação social e eventos",
+        },
+        minimal: {
+          name: "⚡ Mínimo",
+          intents: ["GUILDS"],
+          description: "Apenas info de servidores",
+        },
+      };
+
+      const DEFAULT_EVENTS = [
+        "READY",
+        "RESUMED",
+        "VOICE_SERVER_UPDATE",
+        "USER_UPDATE",
+        "INTERACTION_CREATE",
+      ];
+
+      let selectedIntents = new Set();
+      let privilegedEnabled = {
+        members: false,
+        presences: false,
+        messageContent: false,
+      };
+      let showBinary = false;
+      let compareMode = false;
+
+      function init() {
+        console.log("Init chamado!");
+        loadPrivileged();
+        renderTemplates();
+        renderIntentsList();
+        updateDisplay();
+
+        document
+          .getElementById("privileged-members")
+          .addEventListener("change", (e) =>
+            togglePrivileged("members", e.target.checked)
+          );
+        document
+          .getElementById("privileged-presences")
+          .addEventListener("change", (e) =>
+            togglePrivileged("presences", e.target.checked)
+          );
+        document
+          .getElementById("privileged-content")
+          .addEventListener("change", (e) =>
+            togglePrivileged("messageContent", e.target.checked)
+          );
+
+        document
+          .getElementById("decode-input")
+          .addEventListener("keypress", (e) => {
+            if (e.key === "Enter") decodeIntents();
+          });
+        document
+          .getElementById("decode-btn")
+          .addEventListener("click", decodeIntents);
+        document
+          .getElementById("compare-btn")
+          .addEventListener("click", toggleCompare);
+
+        document
+          .getElementById("copy-btn")
+          .addEventListener("click", copyValue);
+        document
+          .getElementById("export-btn")
+          .addEventListener("click", exportConfig);
+        document
+          .getElementById("import-btn")
+          .addEventListener("click", () =>
+            document.getElementById("import-file").click()
+          );
+        document
+          .getElementById("import-file")
+          .addEventListener("change", importConfig);
+        document
+          .getElementById("clear-all-btn")
+          .addEventListener("click", clearAll);
+        document
+          .getElementById("binary-toggle-btn")
+          .addEventListener("click", toggleBinary);
+
+        console.log("Event listeners configurados!");
+      }
+
+      function loadPrivileged() {
+        const saved = JSON.parse(
+          localStorage.getItem("privilegedIntents") || "{}"
+        );
+        privilegedEnabled = {
+          members: saved.members || false,
+          presences: saved.presences || false,
+          messageContent: saved.messageContent || false,
+        };
+        document.getElementById("privileged-members").checked =
+          privilegedEnabled.members;
+        document.getElementById("privileged-presences").checked =
+          privilegedEnabled.presences;
+        document.getElementById("privileged-content").checked =
+          privilegedEnabled.messageContent;
+      }
+
+      function togglePrivileged(type, checked) {
+        privilegedEnabled[type] = checked;
+        localStorage.setItem(
+          "privilegedIntents",
+          JSON.stringify(privilegedEnabled)
+        );
+
+        if (!checked) {
+          if (type === "members") selectedIntents.delete("GUILD_MEMBERS");
+          if (type === "presences") selectedIntents.delete("GUILD_PRESENCES");
+          if (type === "messageContent")
+            selectedIntents.delete("MESSAGE_CONTENT");
+        }
+
+        renderIntentsList();
+        updateDisplay();
+      }
+
+      function renderTemplates() {
+        const container = document.getElementById("templates");
+        if (!container) {
+          console.error("Templates container não encontrado!");
+          return;
+        }
+
+        const html = Object.entries(TEMPLATES)
+          .map(
+            ([key, t]) => `
+                <button class="template-btn" data-template="${key}">
+                    <div class="template-name">${t.name}</div>
+                    <div class="template-desc">${t.description}</div>
+                </button>
+            `
+          )
+          .join("");
+
+        container.innerHTML = html;
+
+        container.querySelectorAll(".template-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const template = btn.getAttribute("data-template");
+            applyTemplate(template);
+          });
+        });
+
+        console.log("Templates renderizados:", Object.keys(TEMPLATES).length);
+      }
+
+      function applyTemplate(key) {
+        const template = TEMPLATES[key];
+        selectedIntents = new Set(template.intents);
+
+        const needsMembers = selectedIntents.has("GUILD_MEMBERS");
+        const needsPresences = selectedIntents.has("GUILD_PRESENCES");
+        const needsContent = selectedIntents.has("MESSAGE_CONTENT");
+
+        if (needsMembers) {
+          privilegedEnabled.members = true;
+          document.getElementById("privileged-members").checked = true;
+        }
+        if (needsPresences) {
+          privilegedEnabled.presences = true;
+          document.getElementById("privileged-presences").checked = true;
+        }
+        if (needsContent) {
+          privilegedEnabled.messageContent = true;
+          document.getElementById("privileged-content").checked = true;
+        }
+
+        localStorage.setItem(
+          "privilegedIntents",
+          JSON.stringify(privilegedEnabled)
+        );
+        renderIntentsList();
+        updateDisplay();
+      }
+
+      function renderIntentsList() {
+        const container = document.getElementById("intents-list");
+        if (!container) {
+          console.error("Intents list container não encontrado!");
+          return;
+        }
+
+        console.log(
+          "Renderizando intents, selecionadas:",
+          selectedIntents.size
+        );
+
+        const html = Object.entries(INTENTS)
+          .map(([name, data]) => {
+            const isDisabled =
+              data.privileged &&
+              ((name === "GUILD_MEMBERS" && !privilegedEnabled.members) ||
+                (name === "GUILD_PRESENCES" && !privilegedEnabled.presences) ||
+                (name === "MESSAGE_CONTENT" &&
+                  !privilegedEnabled.messageContent));
+
+            const isSelected = selectedIntents.has(name);
+
+            return `
+                    <div class="intent-item ${isSelected ? "selected" : ""} ${
+              isDisabled ? "disabled" : ""
+            }" data-intent="${name}">
+                        <input type="checkbox" 
+                               class="intent-checkbox"
+                               ${isSelected ? "checked" : ""}
+                               ${isDisabled ? "disabled" : ""}
+                               data-intent-check="${name}">
+                        <div class="intent-info" style="cursor: ${
+                          isDisabled ? "not-allowed" : "pointer"
+                        };">
+                            <div class="intent-name">
+                                ${name}
+                                ${
+                                  data.privileged
+                                    ? '<span class="shield-icon">🛡️</span>'
+                                    : ""
+                                }
+                            </div>
+                            <div class="intent-details">bit ${data.bit} • ${
+              data.events.length
+            } eventos</div>
+                        </div>
+                    </div>
+                `;
+          })
+          .join("");
+
+        container.innerHTML = html;
+
+        container.querySelectorAll(".intent-item").forEach((item) => {
+          const intent = item.getAttribute("data-intent");
+          const checkbox = item.querySelector(".intent-checkbox");
+          const info = item.querySelector(".intent-info");
+
+          if (checkbox && !checkbox.disabled) {
+            checkbox.addEventListener("change", (e) => {
+              e.stopPropagation();
+              toggleIntent(intent);
+            });
+
+            info.addEventListener("click", () => {
+              toggleIntent(intent);
+            });
+          }
+        });
+
+        console.log("Intents renderizadas:", Object.keys(INTENTS).length);
+      }
+
+      function toggleIntent(name) {
+        if (selectedIntents.has(name)) {
+          selectedIntents.delete(name);
+        } else {
+          selectedIntents.add(name);
+        }
+        renderIntentsList();
+        updateDisplay();
+      }
+
+      function calculateValue() {
+        let value = 0;
+        selectedIntents.forEach((intent) => {
+          if (INTENTS[intent]) value |= 1 << INTENTS[intent].bit;
+        });
+        return value;
+      }
+
+      function updateDisplay() {
+        const value = calculateValue();
+        document.getElementById("intent-value").textContent = value;
+        document.getElementById("hint-value").textContent = value;
+
+        const binary = value.toString(2).padStart(32, "0");
+        document.getElementById("binary-value").textContent = "0b" + binary;
+
+        updateEvents();
+        updateCodeExample();
+        checkMissingPrivileged();
+
+        if (compareMode) {
+          showComparison();
+        }
+      }
+
+      function updateEvents() {
+        const events = new Set(DEFAULT_EVENTS);
+        selectedIntents.forEach((intent) => {
+          INTENTS[intent].events.forEach((e) => events.add(e));
+        });
+
+        const eventsList = Array.from(events).sort();
+        document.getElementById("events-count").textContent = eventsList.length;
+
+        document.getElementById("events-list").innerHTML = eventsList
+          .map(
+            (event) => `
+                <a href="https://discord.com/developers/docs/topics/gateway-events#${event
+                  .toLowerCase()
+                  .replace(/_/g, "-")}"
+                   target="_blank"
+                   class="event-item">
+                    ${event}
+                </a>
+            `
+          )
+          .join("");
+      }
+
+      function updateCodeExample() {
+        const value = calculateValue();
+        const intentsList = Array.from(selectedIntents)
+          .map((i) => `    GatewayIntentBits.${i}`)
+          .join(",\n");
+
+        document.getElementById("code-example").textContent = `// discord.js
+const { Client, GatewayIntentBits } = require('discord.js');
+
+const client = new Client({
+  intents: ${value}
+});
+
+// Ou usando flags:
+const client = new Client({
+  intents: [
+${intentsList || "    // Nenhuma intent selecionada"}
+  ]
+});`;
+      }
+
+      function checkMissingPrivileged() {
+        const missing = [];
+
+        selectedIntents.forEach((intent) => {
+          const data = INTENTS[intent];
+          if (!data.privileged) return;
+
+          if (intent === "GUILD_MEMBERS" && !privilegedEnabled.members)
+            missing.push(intent);
+          if (intent === "GUILD_PRESENCES" && !privilegedEnabled.presences)
+            missing.push(intent);
+          if (intent === "MESSAGE_CONTENT" && !privilegedEnabled.messageContent)
+            missing.push(intent);
+        });
+
+        const warning = document.getElementById("missing-warning");
+        if (missing.length > 0) {
+          warning.style.display = "block";
+          warning.textContent = `⚠️ Você selecionou ${missing.join(
+            ", "
+          )} mas não habilitou a intent privilegiada correspondente!`;
+        } else {
+          warning.style.display = "none";
+        }
+      }
+
+      function clearAll() {
+        selectedIntents.clear();
+        renderIntentsList();
+        updateDisplay();
+      }
+
+      function toggleBinary() {
+        showBinary = !showBinary;
+        const binaryView = document.getElementById("binary-value");
+        const toggleText = document.getElementById("binary-toggle-text");
+
+        if (showBinary) {
+          binaryView.style.display = "block";
+          toggleText.textContent = "🙈 Ocultar Binário";
+        } else {
+          binaryView.style.display = "none";
+          toggleText.textContent = "👁️ Ver Binário";
+        }
+      }
+
+      function copyValue() {
+        const value = calculateValue();
+        navigator.clipboard.writeText(value.toString());
+        alert(
+          `Copiado: ${value}\n\nUse no seu bot:\nnew Client({ intents: ${value} })`
+        );
+      }
+
+      function decodeIntents() {
+        const input = document.getElementById("decode-input");
+        const value = parseInt(input.value);
+
+        if (isNaN(value)) {
+          alert("Valor inválido!");
+          return;
+        }
+
+        selectedIntents.clear();
+        Object.entries(INTENTS).forEach(([name, data]) => {
+          if (value & (1 << data.bit)) {
+            selectedIntents.add(name);
+          }
+        });
+
+        input.value = "";
+        renderIntentsList();
+        updateDisplay();
+      }
+
+      function toggleCompare() {
+        compareMode = !compareMode;
+        const btn = document.getElementById("compare-btn");
+
+        if (compareMode) {
+          btn.textContent = "Desativar";
+          btn.style.background = "#10b981";
+          showComparison();
+        } else {
+          btn.textContent = "Ativar";
+          btn.style.background = "#4b5563";
+          document.getElementById("comparison-result").innerHTML = "";
+        }
+      }
+
+      function showComparison() {
+        const compareInput = document.getElementById("compare-input").value;
+        const compareValue = parseInt(compareInput);
+
+        if (isNaN(compareValue)) {
+          document.getElementById("comparison-result").innerHTML = "";
+          return;
+        }
+
+        const currentValue = calculateValue();
+        const currentSet = new Set();
+        const compareSet = new Set();
+
+        Object.entries(INTENTS).forEach(([name, data]) => {
+          if (currentValue & (1 << data.bit)) currentSet.add(name);
+          if (compareValue & (1 << data.bit)) compareSet.add(name);
+        });
+
+        const added = Array.from(currentSet).filter((x) => !compareSet.has(x));
+        const removed = Array.from(compareSet).filter(
+          (x) => !currentSet.has(x)
+        );
+
+        let html = '<div class="comparison-box"><h3>Comparação</h3>';
+
+        if (added.length > 0) {
+          html += `<div class="comp-added">✓ Adicionados: ${added.join(
+            ", "
+          )}</div>`;
+        }
+
+        if (removed.length > 0) {
+          html += `<div class="comp-removed">✗ Removidos: ${removed.join(
+            ", "
+          )}</div>`;
+        }
+
+        if (added.length === 0 && removed.length === 0) {
+          html += '<div style="color: #9ca3af;">Nenhuma diferença</div>';
+        }
+
+        html += "</div>";
+        document.getElementById("comparison-result").innerHTML = html;
+      }
+
+      function exportConfig() {
+        const config = {
+          intents: Array.from(selectedIntents),
+          value: calculateValue(),
+          privileged: privilegedEnabled,
+        };
+
+        const blob = new Blob([JSON.stringify(config, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "discord-intents-config.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function importConfig(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const config = JSON.parse(e.target.result);
+            selectedIntents = new Set(config.intents);
+
+            if (config.privileged) {
+              privilegedEnabled = config.privileged;
+              document.getElementById("privileged-members").checked =
+                privilegedEnabled.members;
+              document.getElementById("privileged-presences").checked =
+                privilegedEnabled.presences;
+              document.getElementById("privileged-content").checked =
+                privilegedEnabled.messageContent;
+              localStorage.setItem(
+                "privilegedIntents",
+                JSON.stringify(privilegedEnabled)
+              );
+            }
+
+            renderIntentsList();
+            updateDisplay();
+            alert("Configuração importada com sucesso!");
+          } catch (err) {
+            alert("Arquivo inválido!");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+
+      console.log("Script carregado!");
+    </script>
+  </body>
+</html>
